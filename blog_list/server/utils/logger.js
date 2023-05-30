@@ -1,3 +1,6 @@
+/*
+ * Console logging
+*/
 const info = (...params) => {
   console.log(...params)
 }

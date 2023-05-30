@@ -1,3 +1,7 @@
+/*
+ * Initializing the app
+ * Connecting to database
+*/
 const config = require('./utils/config')
 const express = require('express')
 const app = express()
@@ -29,3 +33,4 @@ app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
 module.exports = app
+
