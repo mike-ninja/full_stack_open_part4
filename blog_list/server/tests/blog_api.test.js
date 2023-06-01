@@ -39,29 +39,6 @@ test('specific blog is within the returned blogs', async () => {
   )
 })
 
-test('a valid blog can be added', async () => {
-  console.log('entered a test')
-  const newBlog = {
-    title: 'This is all valid',
-    author: 'This is valid',
-    url: 'link',
-    likes: 5
-  }
-
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
-  const blogsAtEnd = await helper.blogsInDb()
-  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
-
-  const titles = blogsAtEnd.map(b => b.title)
-  expect(titles).toContain(
-    'How to be Jesus Christ'
-  )
-})
 
 // test('an invalid blog can not be added', async () => {
 //   console.log('entered a test')
@@ -108,6 +85,57 @@ test('a blog can be deleted', async () => {
   expect(titles).not.toContain(blogToDelete.title)
 })
 
+test('blog id is defined', async() => {
+  console.log('entered test') 
+  const blogsAtStart = await helper.blogsInDb()
+  const ids = blogsAtStart.map(b => b.id)
+  expect(ids).toBeDefined()
+})
+
+describe('posting tests', () => {
+  test('a valid blog can be added', async () => {
+    console.log('entered a test')
+    const newBlog = {
+      title: 'This is all valid',
+      author: 'This is valid',
+      url: 'link',
+      likes: 5
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+    const titles = blogsAtEnd.map(b => b.title)
+    expect(titles).toContain(
+      'This is all valid'
+    )
+  })
+
+  test('if like property missing, default to 0', async () => {
+    console.log('entered a test')
+    const newBlog = {
+      title: 'Random title',
+      author: 'Random author',
+      url: 'Random Link',
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    const likes = blogsAtEnd.map(b => b.likes)
+    expect(likes).not.toContain(undefined)
+  })
+})
 afterAll(async () => {
   await mongoose.connection.close()
 })
