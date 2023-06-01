@@ -3,10 +3,29 @@
 */
 const mongoose = require('mongoose')
 
+// const blogShema = new mongoose.Schema({
+//   title: {
+//     type: String,
+//     required: true
+//   },
+//   author: String,
+//   url: {
+//     type: String,
+//     required: true
+//   },
+//   likes: Number
+// })
+
 const blogShema = new mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    required: true
+  },
   author: String,
-  url: String,
+  url: {
+    type: String,
+    required: true
+  },
   likes: Number
 })
 

@@ -98,7 +98,7 @@ describe('posting tests', () => {
     const newBlog = {
       title: 'This is all valid',
       author: 'This is valid',
-      url: 'link',
+      url: 'This is a valid link',
       likes: 5
     }
 
@@ -135,7 +135,35 @@ describe('posting tests', () => {
     const likes = blogsAtEnd.map(b => b.likes)
     expect(likes).not.toContain(undefined)
   })
+
+  test('if title missing, get 400', async () => {
+    console.log('entered a test')
+    const newBlog = {
+      author: 'Random Author',
+      likes: 4
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
+
+  test('if url missing, get 400', async () => {
+    console.log('entered a test')
+    const newBlog = {
+      title: 'Random title',
+      author: 'Random Author',
+      likes: 4
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+  })
 })
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
