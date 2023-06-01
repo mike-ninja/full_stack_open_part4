@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
 const supertest = require('supertest')
+const mongoose = require('mongoose')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
@@ -7,94 +7,75 @@ const Blog = require('../models/blog')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
-
-  const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
-  const promiseArray = blogObjects.map(blog => blog.save())
-  await Promise.all(promiseArray)
+  await Blog.insertMany(helper.initialBlogs)
 })
 
-test('blogs are returned as json', async () => {
-  console.log('entered a test')
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+describe('Where there is initially some blogs saved', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('all blogs are returned', async () => {
+    const response = await api.get('/api/blogs')
+
+    expect(response.body).toHaveLength(helper.initialBlogs.length)
+  })
+
+  test('specific blog is within the returned blogs', async () => {
+    const response = await api.get('/api/blogs')
+
+    const titles = response.body.map(r => r.title)
+    expect(titles).toContain(
+      'How to be Jesus Christ'
+    )
+  })
 })
 
-test('all blogs are returned', async () => {
-  console.log('entered a test')
-  const response = await api.get('/api/blogs')
+describe('Viewing a specific blog', () => {
+  test('succeeds with a valid id', async () => {
+    const blogsAtStart = await helper.blogsInDb() 
 
-  expect(response.body).toHaveLength(helper.initialBlogs.length)
+    const blogToView = blogsAtStart[0]
+    const resultBlog = await api
+      .get(`/api/blogs/${blogToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    expect(resultBlog.body).toEqual(blogToView)
+  })
 })
 
-test('specific blog is within the returned blogs', async () => {
-  console.log('entered test')
-  const response = await api.get('/api/blogs')
+describe('Deletion of blog', () => {
+  test('a blog can be deleted', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
-  const titles = response.body.map(r => r.title)
-  expect(titles).toContain(
-    'How to be Jesus Christ'
-  )
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+
+    const titles = blogsAtEnd.map(r => r.title)
+    expect(titles).not.toContain(blogToDelete.title)
+  })
 })
 
-
-// test('an invalid blog can not be added', async () => {
-//   console.log('entered a test')
-//   const newBlog = {
-//     title: 'This is invalid'
-//   }
-//
-//   await api
-//     .post('/api/blogs')
-//     .send(newBlog)
-//     .expect(400) 
-//
-//   const blogsAtEnd = helper.blogsInDb()
-//   expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
-// })
-
-test('a specific blog can be view', async () => {
-  console.log('entered a test')
-  const blogsAtStart = await helper.blogsInDb() 
-
-  const blogToView = blogsAtStart[0]
-  const resultBlog = await api
-    .get(`/api/blogs/${blogToView.id}`)
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  expect(resultBlog.body).toEqual(blogToView)
-})
-
-test('a blog can be deleted', async () => {
-  console.log('entered a test')
-  const blogsAtStart = await helper.blogsInDb()
-  const blogToDelete = blogsAtStart[0]
-
-  await api
-    .delete(`/api/blogs/${blogToDelete.id}`)
-    .expect(204)
-
-  const blogsAtEnd = await helper.blogsInDb()
-  
-  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
-
-  const titles = blogsAtEnd.map(r => r.title)
-  expect(titles).not.toContain(blogToDelete.title)
-})
-
-test('blog id is defined', async() => {
-  console.log('entered test') 
-  const blogsAtStart = await helper.blogsInDb()
-  const ids = blogsAtStart.map(b => b.id)
-  expect(ids).toBeDefined()
+describe('Blog property tests', () => {
+  test('blog id is defined', async() => {
+    const blogsAtStart = await helper.blogsInDb()
+    const ids = blogsAtStart.map(b => b.id)
+    expect(ids).toBeDefined()
+  })
 })
 
 describe('posting tests', () => {
   test('a valid blog can be added', async () => {
-    console.log('entered a test')
     const newBlog = {
       title: 'This is all valid',
       author: 'This is valid',
@@ -118,7 +99,6 @@ describe('posting tests', () => {
   })
 
   test('if like property missing, default to 0', async () => {
-    console.log('entered a test')
     const newBlog = {
       title: 'Random title',
       author: 'Random author',
@@ -137,7 +117,6 @@ describe('posting tests', () => {
   })
 
   test('if title missing, get 400', async () => {
-    console.log('entered a test')
     const newBlog = {
       author: 'Random Author',
       likes: 4
@@ -150,7 +129,6 @@ describe('posting tests', () => {
   })
 
   test('if url missing, get 400', async () => {
-    console.log('entered a test')
     const newBlog = {
       title: 'Random title',
       author: 'Random Author',
