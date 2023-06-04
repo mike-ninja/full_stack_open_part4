@@ -1,13 +1,14 @@
 /* These are the route handlers. The event handlers of routes
  * are commonly referred to as controllers.
 */
-// Getting all blogs
-const blogsRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
+const blogsRouter = require('express').Router()
 const userExtractor = require('../utils/middleware').userExtractor
+
 const User = require('../models/user')
 const Blog = require('../models/blog')
 
+// Getting all blogs
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
     .find({}).populate('user', { username: 1, name: 1 })

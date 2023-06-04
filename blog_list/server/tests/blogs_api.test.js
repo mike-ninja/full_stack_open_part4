@@ -85,6 +85,7 @@ describe('posting tests', () => {
 
     await api
       .post('/api/blogs')
+      .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pa2UtbmluamEiLCJpZCI6IjY0NzljYWYxN2YxYWM3ZWMxYTVjOWNlYiIsImlhdCI6MTY4NTg3MDU2MH0.UQAm9bdi7NPmbM0385pyYMNCEM9igXdOf5F2ir2BxgY' })
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -107,6 +108,7 @@ describe('posting tests', () => {
 
     await api
       .post('/api/blogs')
+      .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pa2UtbmluamEiLCJpZCI6IjY0NzljYWYxN2YxYWM3ZWMxYTVjOWNlYiIsImlhdCI6MTY4NTg3MDU2MH0.UQAm9bdi7NPmbM0385pyYMNCEM9igXdOf5F2ir2BxgY' })
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
