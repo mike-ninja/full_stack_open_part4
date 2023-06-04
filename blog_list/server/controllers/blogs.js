@@ -4,17 +4,9 @@
 // Getting all blogs
 const blogsRouter = require('express').Router()
 const jwt = require('jsonwebtoken')
+const userExtractor = require('../utils/middleware').userExtractor
 const User = require('../models/user')
 const Blog = require('../models/blog')
-
-// This function has moved to middleware
-// const getTokenForm = request => {
-//   const authorization = request.get('authorization')
-//   if (authorization && authorization.startsWith('Bearer ')) {
-//     return authorization.replace('Bearer ', '')
-//   }
-//   return null
-// }
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
@@ -33,16 +25,9 @@ blogsRouter.get('/:id', async (request, response, next) => {
 })
 
 // Posting a blog
-blogsRouter.post('/', async (request, response, next) => {
+blogsRouter.post('/', userExtractor, async (request, response, next) => {
   const body = request.body 
-  // const decodedToken = jwt.verify(getTokenForm(request), process.env.SECRET)
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
-  const user = await User.findById(decodedToken.id)
+  const user = request.user
 
   const blog = new Blog({
     title: body.title,
@@ -58,6 +43,7 @@ blogsRouter.post('/', async (request, response, next) => {
   response.status(201).json(savedBlog)
 })
 
+// Updating a blog
 blogsRouter.put('/:id', async (request, response, next) => {
   const blog = request.body
  
@@ -74,19 +60,14 @@ blogsRouter.put('/:id', async (request, response, next) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response, next) => {
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
-  const user = await User.findById(decodedToken.id)
+// Deleting a blog
+blogsRouter.delete('/:id', userExtractor, async (request, response, next) => {
+  const user = request.user
   const blog = await Blog.findById(request.params.id)
 
   if (blog) {
     if (blog.user.toString() === user._id.toString()) {
-      await Blog.findByIdAndRemove(request.params.id)
+      await blog.deleteOne()
       response.status(204).end()
     } else {
       response.status(400).json({ error: 'blog does not belong to user' })
